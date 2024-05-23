@@ -1,0 +1,69 @@
+﻿@page "/revista-editar/{volumen}"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+<h3>RevistaCrear</h3>
+
+<h3>Revista</h3>
+
+<EditForm Model="@revista" OnValidSubmit="@Guardar">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Titulo">Nombre del libro</label>
+        <InputText id="Titulo" @bind-Value="revista.Titulo" class="form-control" />
+        <ValidationMessage For="() => revista.Titulo" />
+    </div>
+    <div class="form-group">
+        <label for="Autor">Autor del Libro</label>
+        <InputText id="Autor" @bind-Value="revista.Autor" class="form-control" />
+        <ValidationMessage For="() => revista.Autor" />
+    </div>
+    <div class="form-group">
+        <label for="Genero">Genero Libro</label>
+        <InputText id="Genero" @bind-Value="revista.Genero" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="FechaPublicacion">Fecha de Publicacion</label>
+        <InputDate id="FechaPublicacion" @bind-Value="revista.FechaPublicacion" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Volumen">Volumen</label>
+        <InputText id="Volumen" @bind-Value="revista.Volumen" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="NoEjemplar">Número de Ejemplar</label>
+        <InputNumber id="NoEjemplar" @bind-Value="revista.NoEjemplar" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+</EditForm>
+
+
+@code {
+    private Revista revista = new Revista();
+    List<Revista> revistas = new List<Revista>();
+    [Parameter]
+    public string volumen{ get; set; }
+
+   
+    protected async Task Guardar()
+    {
+
+
+        await localStorage.SetItemAsync("revistas", revistas);
+        NavigationManager.NavigateTo("/revista-crear");
+
+
+    }
+    protected override async Task OnInitializedAsync()
+    {   //La primera vez que se corre poner en comentarios, pues como no existen datos
+        //convierta la lista catedraticos en null
+        revistas = await localStorage.GetItemAsync<List<Revista>>("revistas");
+
+        revista = revistas.FirstOrDefault(c => c.Volumen == volumen);
+    }
+}

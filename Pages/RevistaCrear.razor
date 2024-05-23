@@ -1,0 +1,113 @@
+﻿@page "/revista-crear"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+
+
+<h3>Revista</h3>
+
+<EditForm Model="@revista" OnValidSubmit="@Guardar">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Titulo">Nombre del libro</label>
+        <InputText id="Titulo" @bind-Value="revista.Titulo" class="form-control" />
+        <ValidationMessage For="() => revista.Titulo" />
+    </div>
+    <div class="form-group">
+        <label for="Autor">Autor del Libro</label>
+        <InputText id="Autor" @bind-Value="revista.Autor" class="form-control" />
+        <ValidationMessage For="() => revista.Autor" />
+    </div>
+    <div class="form-group">
+        <label for="Genero">Genero Libro</label>
+        <InputText id="Genero" @bind-Value="revista.Genero" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="FechaPublicacion">Fecha de Publicacion</label>
+        <InputDate id="FechaPublicacion" @bind-Value="revista.FechaPublicacion" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Volumen">Volumen</label>
+        <InputText id="Volumen" @bind-Value="revista.Volumen" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="NoEjemplar">Número de Ejemplar</label>
+        <InputNumber id="NoEjemplar" @bind-Value="revista.NoEjemplar" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</EditForm>
+
+@if (revistas != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Titulo</th>
+                <th>Autor</th>
+                <th>Genero</th>
+                <th>Fecha de publicacion</th>
+                <th>Volumen</th>
+                <th>Numero de ejemplar</th>
+                <th>Editar</th>
+                <th>Borrar</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var revista in revistas)
+            {
+                <tr>
+                    <td>@revista.Titulo</td>
+                    <td>@revista.Autor</td>
+                    <td>@revista.Genero</td>
+                    <td>@revista.FechaPublicacion</td>
+                    <td>@revista.Volumen</td>
+                    <td>@revista.NoEjemplar</td>
+                    <td>
+                        <button class="btn btn-warning"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/revista-editar/{revista.Volumen}"))">
+                            Editar
+                        </button>
+                    </td>
+                    <td><button class="btn btn-danger" @onclick="@(()=> Borrar(revista.Volumen))">Borrar</button></td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Revista revista = new Revista();
+    List<Revista> revistas = new List<Revista>();
+
+    protected async Task Guardar()
+    {
+        revistas.Add(revista);
+
+        await localStorage.SetItemAsync("revistas", revistas);
+
+    }
+    protected async Task Borrar(string volumen)
+    {
+        Revista revistaBorrar = revistas.Find(c => c.Volumen == volumen);
+        revistas.Remove(revistaBorrar);
+
+        await localStorage.SetItemAsync("revistas", revistas);
+
+
+        //en una sola linea seria asi
+        //catedraticos.Remove(catedraticos.Find(lo de la fila 91))
+    }
+    protected override async Task OnInitializedAsync()
+    {   //La primera vez que se corre poner en comentarios, pues como no existen datos
+        //convierta la lista catedraticos en null
+        revistas = await localStorage.GetItemAsync<List<Revista>>("revistas");
+    }
+}
